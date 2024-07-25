@@ -1,0 +1,146 @@
+import java.util.Scanner;
+
+class Point {
+    double x;
+    double y;
+
+    Point(double x_input, double y_input) {
+        this.x = x_input;
+        this.y = y_input;
+    }
+}
+
+class LinearRegression {
+    int N;
+    Point[] data;
+
+    LinearRegression(int N_input) {
+        this.N = N_input;
+        data = new Point[N];
+    }
+
+    double calculate_stdX() {
+        double sum = 0;
+        double xmean = calculate_xmean();
+        for (int i = 0; i < N; i++) {
+            sum += Math.pow((data[i].x - xmean), 2);
+        }
+        sum /= N;
+        return Math.sqrt(sum);
+    }
+
+    double calculate_stdY() {
+        double sum = 0;
+        double ymean = calculate_ymean();
+        for (int i = 0; i < N; i++) {
+            sum += Math.pow((data[i].y - ymean), 2);
+        }
+        sum /= N;
+        return Math.sqrt(sum);
+    }
+
+    double calculate_xmean() {
+        double sum = 0;
+        for (int i = 0; i < N; i++) {
+            sum += data[i].x;
+        }
+        return sum / N;
+    }
+
+    double calculate_ymean() {
+        double sum = 0;
+        for (int i = 0; i < N; i++) {
+            sum += data[i].y;
+        }
+        return sum / N;
+    }
+
+    double calculate_R() {
+        double dif = 0;
+        double xmean = calculate_xmean();
+        double ymean = calculate_ymean();
+        for (int i = 0; i < N; i++) {
+            dif += (data[i].x - xmean) * (data[i].y - ymean);
+        }
+        return dif / ((N - 1) * calculate_stdX() * calculate_stdY());
+    }
+
+    public double calculate_m() {
+        return calculate_R() * calculate_stdY() / calculate_stdX();
+    }
+
+    public double calculate_b() {
+        return calculate_ymean() - calculate_xmean() * calculate_m();
+    }
+
+    public int get_theValue(int x) {
+        double m = calculate_m();
+        double b = calculate_b();
+        return (int) (Math.round(m * x + b));
+    }
+
+    void get_theModel() {
+        double m = calculate_m();
+        double b = calculate_b();
+        System.out.println("y-hat = " + m + "x + " + b);
+    }
+
+    void display_Graph(int x_max, int y_max) {
+        String[][] graph = new String[y_max + 1][x_max + 1];
+        for (int i = 0; i <= y_max; i++) {
+            for (int j = 0; j <= x_max; j++) {
+                graph[i][j] = " ";
+            }
+        }
+
+        for (int i = 0; i <= x_max; i++) {
+            int y_value = get_theValue(i);
+            if (y_value >= 0 && y_value <= y_max) {
+                graph[y_max - y_value][i] = "*";
+            }
+        }
+
+        for (int i = 0; i <= x_max; i++) {
+            graph[y_max][i] = "_";
+        }
+        for (int i = 0; i <= y_max; i++) {
+            graph[i][0] = "|";
+        }
+
+        for (int i = 0; i <= y_max; i++) {
+            for (int j = 0; j <= x_max; j++) {
+                System.out.print(graph[i][j]);
+            }
+            System.out.println();
+        }
+    }
+}
+
+public class Main2 {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+
+        System.out.println("ada berapa banyak data?");
+        int N = input.nextInt();
+        LinearRegression result = new LinearRegression(N);
+
+        int xmax = 0;
+        int ymax = 0;
+
+        for (int i = 0; i < N; i++) {
+            double x = input.nextDouble();
+            double y = input.nextDouble();
+            result.data[i] = new Point(x, y);
+            xmax = (int) Math.max(xmax, x);
+            ymax = (int) Math.max(ymax, y);
+        }
+
+        System.out.println("Rata-rata X: " + result.calculate_xmean());
+        System.out.println("Rata-rata Y: " + result.calculate_ymean());
+        System.out.println("Koefisien korelasi (R): " + result.calculate_R());
+        System.out.println("Standar deviasi X: " + result.calculate_stdX());
+        System.out.println("Standar deviasi Y: " + result.calculate_stdY());
+        result.get_theModel();
+        result.display_Graph(xmax, ymax);
+    }
+}
